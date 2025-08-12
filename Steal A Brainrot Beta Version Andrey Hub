@@ -1,0 +1,212 @@
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local infiniteJumpEnabled = false
+local jumpConnection
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local noclipEnabled = false
+local noclipConnection
+
+local player = game.Players.LocalPlayer
+local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+
+-- Valor padrão do WalkSpeed
+local defaultSpeed = 16
+
+local speedEnabled = false
+local currentSpeed = defaultSpeed
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+local flying = false
+local bodyVelocity
+
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+ 
+local Window = Rayfield:CreateWindow({
+   Name = "Steal a Brainrot "BETA" Andrey Hub",
+   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "Andrey Hub",
+   LoadingSubtitle = "Created by Andreyjr0250",
+   ShowText = "Steal a Brainrot "BETA" Andrey Hub", -- for mobile users to unhide rayfield, change if you'd like
+   Theme = "Green", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+ 
+   ToggleUIKeybind = "K", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+ 
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+ 
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "99 Nights Andrey Hub"
+   },
+ 
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "jTyBnDKp", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+ 
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Untitled",
+      Subtitle = "Key System",
+      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+ 
+local infotab = Window:CreateTab("InfoTab", 4483362458) -- Title, Image
+ 
+local maintab = Window:CreateTab("MainTab", 4483362458) -- Title, Image
+ 
+local Label = infotab:CreateLabel("Create by Andreyjr0250, Enter Discord For Updates - Discord: /jTyBnDKp", 4483362458, Color3.fromRGB(255, 255, 255), false) -- Title, Icon, Color, IgnoreTheme
+ 
+local Toggle = maintab:CreateToggle({
+    Name = "Noclip",
+    CurrentValue = false,
+    Flag = "Toggle1",
+    Callback = function(Value)
+        noclipEnabled = Value
+
+        if noclipEnabled then
+            -- Ativa o noclip
+            noclipConnection = RunService.Stepped:Connect(function()
+                if player.Character then
+                    for _, part in ipairs(player.Character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.CanCollide then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        else
+            -- Desativa o noclip
+            if noclipConnection then
+                noclipConnection:Disconnect()
+                noclipConnection = nil
+            end
+            -- Restaura colisão
+            if player.Character then
+                for _, part in ipairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+    end,
+})
+
+local Toggle = maintab:CreateToggle({
+    Name = "Infinite Jump",
+    CurrentValue = false,
+    Flag = "Toggle1",
+    Callback = function(Value)
+        infiniteJumpEnabled = Value
+
+        if infiniteJumpEnabled then
+            -- Conecta o evento para pular infinitamente
+            jumpConnection = UserInputService.JumpRequest:Connect(function()
+                if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+                    player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+                end
+            end)
+        else
+            -- Desativa o infinite jump
+            if jumpConnection then
+                jumpConnection:Disconnect()
+                jumpConnection = nil
+            end
+        end
+    end,
+})
+
+local Slider = maintab:CreateSlider({
+   Name = "Player Speed",
+   Range = {0, 500},
+   Increment = 10,
+   Suffix = "Speed",
+   CurrentValue = defaultSpeed,
+   Flag = "PlayerSpeedSlider",
+   Callback = function(Value)
+      currentSpeed = Value
+      if speedEnabled and humanoid then
+         humanoid.WalkSpeed = currentSpeed
+      end
+   end,
+})
+
+local Toggle = maintab:CreateToggle({
+   Name = "Actived Player Speed",
+   CurrentValue = false,
+   Flag = "Toggle1",
+   Callback = function(Value)
+      speedEnabled = Value
+      if humanoid then
+         if speedEnabled then
+            humanoid.WalkSpeed = currentSpeed
+         else
+            humanoid.WalkSpeed = defaultSpeed
+         end
+      end
+   end,
+})
+
+local Toggle = maintab:CreateToggle({
+   Name = "Fly",
+   CurrentValue = false,
+   Flag = "FlyToggle",
+   Callback = function(Value)
+      flying = Value
+      if flying then
+         -- Criar BodyVelocity para voar
+         bodyVelocity = Instance.new("BodyVelocity")
+         bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+         bodyVelocity.MaxForce = Vector3.new(0, 0, 0) -- inicia bloqueado
+         bodyVelocity.Parent = rootPart
+
+         -- Conectar controle de voo ao Heartbeat
+         local RunService = game:GetService("RunService")
+
+         local connection
+         connection = RunService.Heartbeat:Connect(function()
+            if not flying or not rootPart or not humanoid then
+               if bodyVelocity then
+                  bodyVelocity:Destroy()
+                  bodyVelocity = nil
+               end
+               if connection then
+                  connection:Disconnect()
+                  connection = nil
+               end
+               return
+            end
+            
+            -- Controle simples: manter o personagem no ar
+            local moveDirection = humanoid.MoveDirection
+            bodyVelocity.MaxForce = Vector3.new(1e4, 1e4, 1e4)
+            bodyVelocity.Velocity = Vector3.new(moveDirection.X * 50, 50, moveDirection.Z * 50)
+         end)
+
+      else
+         -- Desliga voo, limpa BodyVelocity
+         if bodyVelocity then
+            bodyVelocity:Destroy()
+            bodyVelocity = nil
+         end
+      end
+   end,
+})
